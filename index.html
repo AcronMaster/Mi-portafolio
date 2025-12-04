@@ -7,12 +7,20 @@
   <link rel="stylesheet" href="styles.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+</script>
 </head>
 <body>
   <header class="site-header">
     <div class="header-left">
       <div class="brand">
-        <img src="assets/Untitled-removebg-preview.png" alt="Foto de Luis Adrián" class="avatar">
+        <img src="assets/images/Untitled-removebg-preview.png" alt="Foto de Luis Adrián" class="avatar">
         <div>
           <h1>Luis Adrián Cauich Dzul</h1>
           <p class="title-small">Portafolio 3D & Desarrollo</p>
@@ -56,13 +64,17 @@
   <section id="projects">
     <h2>Proyectos</h2>
     <div class="project-layout">
-      <div id="webgl-container"></div>
-      <div class="project-buttons">
-        <button id="rotateBtn">🔄 Rotar modelo</button>
-        <button id="colorBtn">🎨 Cambiar color</button>
-        <button id="resetBtn">🔁 Reset</button>
-      </div>
-    </div>
+  
+  <div id="webgl-container">
+     <div id="loader-text">Cargando modelo 3D...</div>
+  </div>
+
+  <div class="project-buttons">
+    <button id="rotateBtn">🔄 Rotar modelo</button>
+    <button id="colorBtn">🎨 Cambiar color</button>
+    <button id="resetBtn">🔁 Reset</button>
+  </div>
+</div>
   </section>
 
   <footer class="site-footer">

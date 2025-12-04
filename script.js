@@ -1,166 +1,190 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-// Referencias DOM
+// --- CONFIGURACIÓN DE LA ESCENA ---
 const container = document.getElementById('webgl-container');
-if (!container) {
-  console.error('Contenedor #webgl-container no encontrado. Asegúrate de que exista en el HTML.');
-}
-
-// Escena
 const scene = new THREE.Scene();
-// Fondo negro para que el modelo destaque (sin alterar el GLB)
-scene.background = new THREE.Color(0x000000);
 
-// Función utilitaria para obtener tamaño seguro
-function getContainerSize() {
-  if (!container) return { width: window.innerWidth, height: window.innerHeight };
-  const rect = container.getBoundingClientRect();
-  const width = rect.width || container.clientWidth || window.innerWidth;
-  const height = rect.height || container.clientHeight || window.innerHeight;
-  return { width, height };
-}
-
-const { width: initW, height: initH } = getContainerSize();
-
-// Cámara
-const camera = new THREE.PerspectiveCamera(75, initW / Math.max(1, initH), 0.1, 1000);
-camera.position.set(0, 1.5, 3);
-
-// Renderizador
+// Usamos alpha: true para que el fondo del canvas sea transparente
+// y se vea el gradiente CSS de tu sitio web.
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.outputEncoding = THREE.sRGBEncoding;
-renderer.setSize(initW, initH);
-if (container) container.appendChild(renderer.domElement);
+renderer.setSize(container.clientWidth, container.clientHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.shadowMap.enabled = true; // Habilitar sombras si el modelo las soporta
+container.appendChild(renderer.domElement);
 
-// Controles
+// --- CÁMARA ---
+const camera = new THREE.PerspectiveCamera(
+    45, 
+    container.clientWidth / container.clientHeight, 
+    0.1, 
+    1000
+);
+camera.position.set(0, 2, 5); // Posición inicial temporal
+
+// --- CONTROLES (OrbitControls) ---
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
+controls.enableDamping = true; // Movimiento suave
+controls.dampingFactor = 0.05;
+controls.enableZoom = true;
+controls.enablePan = true;
 
-// Luces
-// Luces: ligeros ajustes para que se noten mejor sobre fondo oscuro
-scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-const dirLight = new THREE.DirectionalLight(0xffffff, 1.4);
-dirLight.position.set(5, 10, 5);
+// --- ILUMINACIÓN ---
+// Luz ambiental suave
+const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+scene.add(ambientLight);
+
+// Luz direccional (como el sol/foco principal)
+const dirLight = new THREE.DirectionalLight(0xffffff, 2);
+dirLight.position.set(5, 10, 7);
 scene.add(dirLight);
 
-const pointLight1 = new THREE.PointLight(0xffaa00, 2.6, 6);
-pointLight1.position.set(0, 2, 2);
-scene.add(pointLight1);
-const pointLight2 = new THREE.PointLight(0x00aaff, 2.0, 6);
-pointLight2.position.set(-2, 1, -2);
-scene.add(pointLight2);
+// Luz de acento (para que se vea bien el estilo "Gamer")
+const spotLight = new THREE.SpotLight(0x7f5af0, 5);
+spotLight.position.set(-5, 5, 0);
+scene.add(spotLight);
 
-// Cargar modelo GLB (con manejo de errores y preservando texturas si existen)
-let model = null;
+// --- CARGA DEL MODELO 3D ---
+let loadedModel;
+let mixer; // Para animaciones si el GLB las tuviera
 const loader = new GLTFLoader();
+
 loader.load(
-  'models/Setup_Gamer_Project9.glb',
-  (gltf) => {
-    model = gltf.scene;
+    'assets/3d/Setup_Gamer_Project.glb', 
+    (gltf) => {
+        loadedModel = gltf.scene;
+        // ... dentro de loader.load(..., (gltf) => { ...
 
-    model.traverse((child) => {
-      if (child.isMesh) {
-        const original = child.material;
-        // Obtener color base si está disponible
-        const baseColor = original && original.color ? original.color.clone() : new THREE.Color(0xaaaaaa);
-        const newMat = new THREE.MeshStandardMaterial({
-          color: baseColor,
-          emissive: new THREE.Color(0x222222),
-          metalness: 0.5,
-          roughness: 0.5,
-        });
-        // preservar mapas/propiedades comunes
-        if (original && original.map) newMat.map = original.map;
-        if (original && original.normalMap) newMat.normalMap = original.normalMap;
-        if (original && original.roughnessMap) newMat.roughnessMap = original.roughnessMap;
-        newMat.needsUpdate = true;
-        child.material = newMat;
-        child.castShadow = true;
-        child.receiveShadow = true;
-      }
-    });
+    scene.add(loadedModel);
 
-    model.scale.set(1, 1, 1);
-    model.position.set(0, 0, 0);
-    scene.add(model);
-  },
-  undefined,
-  (error) => {
-    console.error('Error al cargar el modelo GLB:', error);
-    // Mostrar mensaje sencillo en la UI
-    const msg = document.createElement('div');
-    msg.textContent = 'No se pudo cargar el modelo 3D (archivo faltante o inválido).';
-    msg.style.color = '#900';
-    if (container) container.appendChild(msg);
-  }
+    // AÑADIR ESTO: Ocultar texto de carga
+    const loaderText = document.getElementById('loader-text');
+    if(loaderText) loaderText.style.display = 'none';
+
+    // ... el resto del código de la cámara ...
+        
+        // Centrar y escalar el modelo automáticamente
+        const box = new THREE.Box3().setFromObject(loadedModel);
+        const center = box.getCenter(new THREE.Vector3());
+        const size = box.getSize(new THREE.Vector3());
+        
+        // Resetear posición del modelo para que gire sobre su propio eje
+        loadedModel.position.x += (loadedModel.position.x - center.x);
+        loadedModel.position.y += (loadedModel.position.y - center.y);
+        loadedModel.position.z += (loadedModel.position.z - center.z);
+        
+        scene.add(loadedModel);
+
+        // Ajustar cámara basada en el tamaño del modelo
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const fov = camera.fov * (Math.PI / 180);
+        let cameraZ = Math.abs(maxDim / 2 * Math.tan(fov * 2));
+        cameraZ *= 2.5; // Factor de zoom para alejar un poco
+        
+        camera.position.set(0, maxDim / 2, cameraZ);
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        // Animación de entrada simple
+        loadedModel.scale.set(0,0,0);
+        let scale = 0;
+        const entryAnim = setInterval(() => {
+            scale += 0.05;
+            loadedModel.scale.set(scale, scale, scale);
+            if(scale >= 1) clearInterval(entryAnim);
+        }, 16);
+
+        console.log("Modelo cargado exitosamente");
+    },
+    (xhr) => {
+        // Progreso de carga (opcional)
+        // console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+    },
+    (error) => {
+        console.error('Error cargando el modelo:', error);
+        container.innerHTML = '<p style="color:white; text-align:center; padding-top:20px;">Error al cargar el modelo 3D.</p>';
+    }
 );
 
-// Botones: comprobar existencia antes de añadir listeners
-let rotate = false;
-const rotateBtn = document.getElementById('rotateBtn');
-const colorBtn = document.getElementById('colorBtn');
-const resetBtn = document.getElementById('resetBtn');
+// --- INTERACTIVIDAD DEL USUARIO (Botones 3D) ---
+let isAutoRotating = false;
+
+// 1. Botón Rotar
+document.getElementById('rotateBtn').addEventListener('click', () => {
+    isAutoRotating = !isAutoRotating;
+});
+
+// 2. Botón Cambiar Color (Randomiza el color de los materiales)
+document.getElementById('colorBtn').addEventListener('click', () => {
+    if (loadedModel) {
+        loadedModel.traverse((child) => {
+            if (child.isMesh) {
+                // Generar color aleatorio vibrante
+                const randomColor = new THREE.Color(`hsl(${Math.random() * 360}, 100%, 50%)`);
+                // Clonamos el material para no afectar a otros objetos que compartan material
+                child.material = child.material.clone();
+                child.material.color.set(randomColor);
+            }
+        });
+    }
+});
+
+// 3. Botón Reset
+document.getElementById('resetBtn').addEventListener('click', () => {
+    if (loadedModel) {
+        controls.reset();
+        isAutoRotating = false;
+        // Restaurar color blanco base (o recargar modelo si fuera necesario)
+        loadedModel.traverse((child) => {
+            if (child.isMesh) {
+                child.material.color.set(0xffffff);
+            }
+        });
+    }
+});
+
+
+// --- LÓGICA DE LA INTERFAZ (UI) ---
+
+// Modo Oscuro
 const darkModeBtn = document.getElementById('darkModeBtn');
-
-if (rotateBtn) rotateBtn.addEventListener('click', () => (rotate = !rotate));
-if (colorBtn) colorBtn.addEventListener('click', () => {
-  if (!model) return;
-  model.traverse((child) => {
-    if (child.isMesh && child.material && child.material.color) {
-      child.material.color.setHex(Math.floor(Math.random() * 0xffffff));
-    }
-  });
-});
-if (resetBtn) resetBtn.addEventListener('click', () => {
-  if (!model) return;
-  model.rotation.set(0, 0, 0);
-  model.position.set(0, 0, 0);
-});
-if (darkModeBtn) darkModeBtn.addEventListener('click', () => {
-  document.body.classList.toggle('dark-mode');
+darkModeBtn.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    darkModeBtn.textContent = isDark ? '☀️' : '🌙';
 });
 
-// Animación
-function animate() {
-  requestAnimationFrame(animate);
-  if (rotate && model) model.rotation.y += 0.01;
-  controls.update();
-  renderer.render(scene, camera);
-}
-animate();
-
-// Redimensionar de forma robusta
-function onWindowResize() {
-  const { width, height } = getContainerSize();
-  camera.aspect = width / Math.max(1, height);
-  camera.updateProjectionMatrix();
-  renderer.setSize(width, height);
-}
-
-window.addEventListener('resize', onWindowResize);
-
-// Copiar email al portapapeles y mostrar toast
+// Copiar Email
 const copyBtn = document.getElementById('copyEmailBtn');
-const copyToast = document.getElementById('copyToast');
-if (copyBtn) {
-  copyBtn.addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText('cauichadrian04@gmail.com');
-      if (copyToast) {
-        copyToast.setAttribute('aria-hidden', 'false');
-        copyToast.classList.add('show');
-        setTimeout(() => {
-          if (copyToast) {
-            copyToast.classList.remove('show');
-            copyToast.setAttribute('aria-hidden', 'true');
-          }
-        }, 1800);
-      }
-    } catch (err) {
-      console.error('No se pudo copiar el email:', err);
+const toast = document.getElementById('copyToast');
+
+copyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText('cauichadrian04@gmail.com').then(() => {
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    });
+});
+
+// Responsive Resize
+window.addEventListener('resize', () => {
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+});
+
+
+// --- BUCLE DE ANIMACIÓN (Render Loop) ---
+function animate() {
+    requestAnimationFrame(animate);
+
+    // Rotación automática si está activa
+    if (loadedModel && isAutoRotating) {
+        loadedModel.rotation.y += 0.005;
     }
-  });
+
+    controls.update(); // Necesario para el damping
+    renderer.render(scene, camera);
 }
+
+animate();
