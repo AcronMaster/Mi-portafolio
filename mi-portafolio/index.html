@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luis Adrián Cauich Dzul - Portafolio 3D</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-left">
+      <div class="brand">
+        <img src="assets/Untitled-removebg-preview.png" alt="Foto de Luis Adrián" class="avatar">
+        <div>
+          <h1>Luis Adrián Cauich Dzul</h1>
+          <p class="title-small">Portafolio 3D & Desarrollo</p>
+        </div>
+      </div>
+    </div>
+    <div class="header-right">
+      <nav class="socials">
+        <a href="https://github.com/AcronMaster" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
+        <a href="mailto:cauichadrian04@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+      </nav>
+      <div class="header-actions">
+        <button id="darkModeBtn" class="icon-btn" title="Modo oscuro">🌙</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <h2 class="hero-title">Hola, soy Luis — creo experiencias 3D y software</h2>
+      <p class="hero-sub">Diseño y programo proyectos interactivos. Explora mi trabajo y el modelo 3D abajo.</p>
+      <a class="btn primary" href="#projects">Ver proyectos</a>
+    </div>
+    <div class="hero-decor" aria-hidden="true"></div>
+  </section>
+
+  <section id="about" class="about section-card">
+    <h2>Sobre mí</h2>
+    <p>Soy un estudiante de Ingeniería en Sistemas Computacionales, tengo 20 años y soy de México. Me apasiona el desarrollo de software, la creación de contenido 3D y la programación.</p>
+  </section>
+
+  <section id="skills">
+    <h2>Habilidades</h2>
+    <div class="skills-container">
+      <div class="skill"><i class="fas fa-cube"></i> Blender</div>
+      <div class="skill"><i class="fab fa-google"></i> Flutter</div>
+      <div class="skill"><i class="fab fa-python"></i> Python</div>
+    </div>
+  </section>
+
+  <section id="projects">
+    <h2>Proyectos</h2>
+    <div class="project-layout">
+      <div id="webgl-container"></div>
+      <div class="project-buttons">
+        <button id="rotateBtn">🔄 Rotar modelo</button>
+        <button id="colorBtn">🎨 Cambiar color</button>
+        <button id="resetBtn">🔁 Reset</button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="contact-header">
+        <h2>Contacto</h2>
+        <p class="contact-sub">Disponible para colaboraciones y proyectos freelance.</p>
+      </div>
+
+      <div class="contact-cards">
+        <div class="contact-card">
+          <div class="card-left"><i class="fas fa-envelope fa-2x"></i></div>
+          <div class="card-body">
+            <strong>Email</strong>
+            <div class="card-meta">cauichadrian04@gmail.com</div>
+          </div>
+          <div class="card-actions">
+            <a class="btn" href="mailto:cauichadrian04@gmail.com"><i class="fas fa-paper-plane"></i> Enviar</a>
+            <button id="copyEmailBtn" class="btn outline"><i class="far fa-copy"></i> Copiar</button>
+          </div>
+        </div>
+
+        <div class="contact-card">
+          <div class="card-left"><i class="fab fa-github fa-2x"></i></div>
+          <div class="card-body">
+            <strong>GitHub</strong>
+            <div class="card-meta">github.com/AcronMaster</div>
+          </div>
+          <div class="card-actions">
+            <a class="btn" href="https://github.com/AcronMaster" target="_blank"><i class="fab fa-github"></i> Ver perfil</a>
+          </div>
+        </div>
+      </div>
+
+      <div id="copyToast" class="copy-toast" aria-hidden="true">Email copiado</div>
+    </div>
+  </footer>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
