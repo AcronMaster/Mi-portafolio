@@ -8,15 +8,6 @@ A personal portfolio / static website built with HTML, CSS, and vanilla JavaScri
 
 ---
 
-## 🌐 Live Demo
-
-Check it out online: [https://AcronMaster.github.io](https://AcronMaster.github.io)  
-
-![Portfolio Preview](https://media.giphy.com/media/3o7TKU8RvQuomFfUUU/giphy.gif)  
-*Example preview of the portfolio interface.*
-
----
-
 ## ✨ Features
 
 - Modern responsive layout  
